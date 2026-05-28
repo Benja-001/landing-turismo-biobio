@@ -61,6 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!formEl) return;
 
         const inputEl = document.getElementById(formObj.inputId);
+        const nombreEl = document.getElementById(formObj.id.replace('form', 'nombre'));
+        const apellidoEl = document.getElementById(formObj.id.replace('form', 'apellido'));
         const errorEl = document.getElementById(formObj.errorId);
         const successEl = document.getElementById(formObj.successId);
         const submitBtn = formEl.querySelector('button[type="submit"]');
@@ -82,6 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
         formEl.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = inputEl.value.trim();
+            const nombre = nombreEl ? nombreEl.value.trim() : '';
+            const apellido = apellidoEl ? apellidoEl.value.trim() : '';
 
             // Validación de formato
             if (!validateEmail(email)) {
@@ -110,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ email: email })
+                    body: JSON.stringify({ nombre: nombre, apellido: apellido, email: email })
                 });
 
                 // Estado de Éxito (Ocultamos el form y mostramos el mensaje)
@@ -141,4 +145,130 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+    
+    /* -------------------------------------------------------------
+       4. Carrusel Vertical Interactivo
+    ------------------------------------------------------------- */
+    const carouselTrack = document.getElementById('carousel-track');
+    if (carouselTrack) {
+        const carouselData = [
+            {
+                img: "https://www.radioudec.cl/wp-content/uploads/2023/01/Lenga.jpg",
+                title: "Caleta Lenga",
+                subtitle: "Descubre nuevas rutas sin congestión"
+            },
+            {
+                img: "https://assets.diarioconcepcion.cl/2023/02/pag-9-playa-ramuntcho-foto-facebook-pen%C3%ADnsula-de-hualpen-santuario-de-la-naturaleza.jpg",
+                title: "Playa Ramuntcho",
+                subtitle: "Un paraíso escondido en la península"
+            },
+            {
+                img: "https://images.mnstatic.com/54/ce/54ce4e39434f2f447d182d2f325ac619.jpg",
+                title: "Parque Lota",
+                subtitle: "Naturaleza, historia y hermosos jardines"
+            },
+            {
+                img: "https://www.monumentos.gob.cl/sites/default/files/styles/16x9_grande/public/image-monumentos/zt_maule_1.jpg?h=00929156&itok=pUGHF9AP",
+                title: "Sector Puchoco-Schwager",
+                subtitle: "Historia y patrimonio minero frente al mar"
+            },
+            {
+                img: "https://upload.wikimedia.org/wikipedia/commons/8/84/DSCF0045_B.jpg?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=original",
+                title: "Mirador Alemán",
+                subtitle: "Vistas panorámicas y naturaleza única"
+            }
+        ];
+
+        // Generar HTML
+        carouselTrack.innerHTML = carouselData.map((item, i) => `
+            <div class="carousel-item absolute w-full h-full rounded-[2rem] overflow-hidden transition-all duration-700 ease-out origin-center shadow-2xl border border-white/20" data-index="${i}">
+                <img src="${item.img}" alt="${item.title}" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-bosque/90 via-bosque/20 to-transparent flex items-end p-8">
+                    <div class="text-white text-left">
+                        <p class="font-bold font-heading text-2xl drop-shadow-lg">${item.title}</p>
+                        <p class="text-sm opacity-90 drop-shadow-md">${item.subtitle}</p>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        const items = document.querySelectorAll('.carousel-item');
+        let currentIndex = 0;
+        let isAnimating = false;
+
+        function updateCarousel() {
+            items.forEach((item, index) => {
+                let y = 0;
+                let scale = 0.5;
+                let blur = 20;
+                let opacity = 0;
+                let zIndex = 0;
+
+                const prevIndex = (currentIndex - 1 + items.length) % items.length;
+                const nextIndex = (currentIndex + 1) % items.length;
+
+                if (index === currentIndex) {
+                    y = 0; scale = 0.9; blur = 0; opacity = 1; zIndex = 20;
+                } else if (index === prevIndex) {
+                    y = -28; scale = 0.75; blur = 4; opacity = 0.8; zIndex = 10;
+                } else if (index === nextIndex) {
+                    y = 28; scale = 0.75; blur = 4; opacity = 0.8; zIndex = 10;
+                }
+
+                item.style.transform = `translateY(${y}%) scale(${scale})`;
+                item.style.filter = `blur(${blur}px)`;
+                item.style.opacity = opacity;
+                item.style.zIndex = zIndex;
+            });
+        }
+
+        function move(dir) {
+            if (isAnimating) return;
+            isAnimating = true;
+            currentIndex = (currentIndex + dir + items.length) % items.length;
+            updateCarousel();
+            setTimeout(() => isAnimating = false, 700);
+        }
+
+        // Eventos Botones
+        document.getElementById('car-up').addEventListener('click', () => move(-1));
+        document.getElementById('car-down').addEventListener('click', () => move(1));
+
+        // Swipe Táctil
+        let touchStartY = 0;
+        const carouselEl = document.getElementById('vertical-carousel');
+        carouselEl.addEventListener('touchstart', e => touchStartY = e.changedTouches[0].screenY);
+        carouselEl.addEventListener('touchend', e => {
+            const touchEndY = e.changedTouches[0].screenY;
+            if (touchStartY - touchEndY > 50) move(1); // Swipe Up -> Siguiente
+            if (touchEndY - touchStartY > 50) move(-1); // Swipe Down -> Anterior
+        });
+
+        // Evento Rueda (Wheel)
+        let wheelTimer;
+        carouselEl.addEventListener('wheel', e => {
+            e.preventDefault(); // Prevenir scroll de la página al estar sobre el carrusel
+            if (isAnimating) return;
+            
+            // Usar un pequeño timer para evitar que haga saltos múltiples por un solo giro de rueda
+            clearTimeout(wheelTimer);
+            wheelTimer = setTimeout(() => {
+                if (e.deltaY > 0) move(1);
+                else if (e.deltaY < 0) move(-1);
+            }, 50);
+        }, { passive: false });
+
+        // Inicializar
+        updateCarousel();
+        
+        // Autoplay cada 3 segundos
+        let autoplayInterval = setInterval(() => move(1), 3000);
+        
+        // Pausar autoplay si el usuario interactúa
+        carouselEl.addEventListener('mouseenter', () => clearInterval(autoplayInterval));
+        carouselEl.addEventListener('mouseleave', () => {
+            clearInterval(autoplayInterval);
+            autoplayInterval = setInterval(() => move(1), 3000);
+        });
+    }
 });
