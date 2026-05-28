@@ -1,0 +1,76 @@
+/* styles.css */
+
+/* Comportamiento general de scroll suave */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Base body */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism para el Header / Sticky Nav */
+.glass-nav {
+    background: rgba(248, 249, 250, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+}
+
+/* Animaciones Scroll (Fade-up) */
+.fade-up {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Hover effects para botones (escala y sombra brillante) */
+.btn-hover {
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-hover:hover {
+    transform: scale(1.05);
+    /* Sombra con color Naranja Terracota (#E76F51) */
+    box-shadow: 0 10px 15px -3px rgba(231, 111, 81, 0.4), 0 4px 6px -2px rgba(231, 111, 81, 0.2);
+}
+
+/* Hover effects para tarjetas de beneficios (levante y sombra suave) */
+.card-hover {
+    transition: all 0.3s ease-in-out;
+}
+
+.card-hover:hover {
+    transform: translateY(-8px);
+    /* Sombra con color Verde Bosque (#2A5D67) */
+    box-shadow: 0 20px 25px -5px rgba(42, 93, 103, 0.1), 0 10px 10px -5px rgba(42, 93, 103, 0.04);
+}
+
+/* Fondo decorativo del Hero Section (Patrón geométrico muy sutil) */
+.hero-bg {
+    background: linear-gradient(135deg, #F8F9FA 0%, #e9ecef 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-bg::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    /* Patrón de puntos */
+    background-image: radial-gradient(rgba(42, 93, 103, 0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    z-index: 0;
+    pointer-events: none;
+}
